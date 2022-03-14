@@ -1,5 +1,18 @@
 @import-normalize;
 
+:root {
+  --main-text-color: #2b2b2b;
+  --second-text-color: #ffffff;
+  --accent-text-color: #0084ff;
+
+  --main-bg-color: #ffffff;
+  --second-bg-color: #2b2b2b;
+  --accent-bg-color: #0084ff;
+  --backdrop-bg-color: rgba(43, 43, 43, 0.5);
+
+  --main-hover-animation: 250ms linear;
+}
+
 body {
   margin: 0;
   padding: 0;
