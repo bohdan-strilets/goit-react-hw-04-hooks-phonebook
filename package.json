@@ -1,8 +1,8 @@
 {
-  "name": "react-project-template",
+  "name": "goit-react-hw-04-hooks-phonebook",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://Boguszz.github.io/react-project-template/",
+  "homepage": "https://Boguszz.github.io/goit-react-hw-04-hooks-phonebook/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
