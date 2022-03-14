@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import { Report } from 'notiflix/build/notiflix-report-aio';
 import { BsFillPersonPlusFill } from 'react-icons/bs';
@@ -9,40 +9,23 @@ import Message from './Message';
 import Modal from './Modal';
 import css from './App.module.css';
 
-class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-    showModal: false,
-  };
+function App() {
+  const [contacts, setContacts] = useState([]);
+  const [filter, setFilter] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
-  componentDidMount() {
+  useEffect(() => {
     const contacts = localStorage.getItem('contacts');
     const parsedContacts = JSON.parse(contacts);
 
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-    }
-  }
+    parsedContacts ? setContacts(parsedContacts) : setContacts([]);
+  }, []);
 
-  componentDidUpdate(prevProps, prevState) {
-    const nextContacts = this.state.contacts;
-    const prevContacts = prevState.contacts;
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-    if (nextContacts !== prevContacts) {
-      localStorage.setItem('contacts', JSON.stringify(nextContacts));
-    }
-
-    if (
-      nextContacts.length > prevContacts.length &&
-      prevContacts.length !== 0
-    ) {
-      this.toggleModal();
-    }
-  }
-
-  addContact = ({ name, number }) => {
-    const { contacts } = this.state;
+  const addContact = ({ name, number }) => {
     const newContact = { id: nanoid(), name, number };
 
     contacts.some(contact => contact.name === name)
@@ -51,71 +34,56 @@ class App extends Component {
           'This user is already in the contact list.',
           'OK',
         )
-      : this.setState(({ contacts }) => ({
-          contacts: [newContact, ...contacts],
-        }));
+      : setContacts(prevContacts => [newContact, ...prevContacts]);
+
+    toggleModal();
   };
 
-  deleteContact = contactId => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
-    }));
+  const deleteContact = contactId => {
+    setContacts(prevContacts =>
+      prevContacts.filter(contact => contact.id !== contactId),
+    );
   };
 
-  changeFilter = e => {
-    this.setState({ filter: e.currentTarget.value });
-  };
+  const changeFilter = e => setFilter(e.currentTarget.value);
 
-  filtredContacts = () => {
-    const { filter, contacts } = this.state;
+  const filtredContacts = () => {
     const normalizedFilter = filter.toLowerCase();
-    return contacts.filter(({ name }) =>
-      name.toLowerCase().includes(normalizedFilter),
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalizedFilter),
     );
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  const toggleModal = () => {
+    setShowModal(prevShowModal => !prevShowModal);
   };
 
-  render() {
-    const { filter, showModal } = this.state;
-    const addContact = this.addContact;
-    const changeFilter = this.changeFilter;
-    const filtredContacts = this.filtredContacts();
-    const deleteContact = this.deleteContact;
-    const length = this.state.contacts.length;
-    const toggleModal = this.toggleModal;
-
-    return (
-      <div className={css.container}>
-        <h1 className={css.title}>
-          Phone<span className={css.title__color}>book</span>
-        </h1>
-        <button className={css.button} type="button" onClick={toggleModal}>
-          <span className={css.button__text}>Add new contact</span>{' '}
-          <BsFillPersonPlusFill size={20} />
-        </button>
-        {showModal && (
-          <Modal onClose={toggleModal} title="Add contact">
-            <ContactForm onSubmit={addContact} />
-          </Modal>
-        )}
-
-        <h2 className={css.subtitle}>Contacts</h2>
-        <Filter filter={filter} changeFilter={changeFilter} />
-
-        {length > 0 ? (
-          <ContactList
-            contacts={filtredContacts}
-            onDeleteContact={deleteContact}
-          />
-        ) : (
-          <Message text="Contact list is empty." />
-        )}
-      </div>
-    );
-  }
+  return (
+    <div className={css.container}>
+      <h1 className={css.title}>
+        Phone<span className={css.title__color}>book</span>
+      </h1>
+      <button className={css.button} type="button" onClick={toggleModal}>
+        <span className={css.button__text}>Add new contact</span>{' '}
+        <BsFillPersonPlusFill size={20} />
+      </button>
+      {showModal && (
+        <Modal onClose={toggleModal} title="Add contact">
+          <ContactForm onSubmit={addContact} />
+        </Modal>
+      )}
+      <h2 className={css.subtitle}>Contacts</h2>
+      <Filter filter={filter} changeFilter={changeFilter} />
+      {contacts.length > 0 ? (
+        <ContactList
+          contacts={filtredContacts()}
+          onDeleteContact={deleteContact}
+        />
+      ) : (
+        <Message text="Contact list is empty." />
+      )}
+    </div>
+  );
 }
 
 export default App;
